@@ -1,0 +1,57 @@
+{
+  "name": "gm-oc",
+  "version": "2.0.20",
+  "description": "Advanced CLI plugin with WFGY integration and code execution skills",
+  "author": "AnEntrypoint",
+  "license": "MIT",
+  "main": "gm.js",
+  "bin": {
+    "gm-oc": "./cli.js",
+    "gm-oc-install": "./install.js"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "mcp",
+    "automation",
+    "gm"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AnEntrypoint/gm-oc.git"
+  },
+  "homepage": "https://github.com/AnEntrypoint/gm-oc#readme",
+  "bugs": {
+    "url": "https://github.com/AnEntrypoint/gm-oc/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "mcp-thorns": "^4.1.0"
+  },
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "files": [
+    "agents/",
+    "hooks/",
+    "skills/",
+    "scripts/",
+    "gm.js",
+    "index.js",
+    "opencode.json",
+    ".github/",
+    ".mcp.json",
+    "README.md",
+    "cli.js",
+    "install.js",
+    "LICENSE",
+    "CONTRIBUTING.md",
+    ".gitignore",
+    ".editorconfig"
+  ]
+}
