@@ -66,6 +66,8 @@ function install() {
   const sourceDir = __dirname;
 
   safeCopyDirectory(path.join(sourceDir, 'agents'), path.join(ocDir, 'agents'));
+  safeCopyDirectory(path.join(sourceDir, 'hooks'), path.join(ocDir, 'hooks'));
+  safeCopyDirectory(path.join(sourceDir, 'skills'), path.join(ocDir, 'skills'));
 }
 
 install();
