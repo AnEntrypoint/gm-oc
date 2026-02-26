@@ -1,6 +1,6 @@
 {
   "name": "gm-oc",
-  "version": "2.0.23",
+  "version": "2.0.24",
   "description": "Advanced Claude Code plugin with WFGY integration, MCP tools, and automated hooks",
   "author": "AnEntrypoint",
   "license": "MIT",
@@ -12,7 +12,6 @@
   "keywords": [
     "opencode",
     "opencode-plugin",
-    "mcp",
     "automation",
     "gm"
   ],
@@ -30,23 +29,19 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {
-    "mcp-thorns": "^4.1.0"
-  },
+  "dependencies": {},
   "scripts": {
     "postinstall": "node scripts/postinstall.js"
   },
   "files": [
     "agents/",
     "hooks/",
-    "skills/",
     "scripts/",
     "gm.js",
     "gm-oc.mjs",
     "index.js",
     "opencode.json",
     ".github/",
-    ".mcp.json",
     "README.md",
     "cli.js",
     "install.js",

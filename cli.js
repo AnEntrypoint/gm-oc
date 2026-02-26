@@ -28,18 +28,15 @@ try {
   // Install ESM plugin for opencode auto-loading from plugins directory
   fs.copyFileSync(path.join(srcDir, 'gm-oc.mjs'), path.join(ocConfigDir, 'plugins', 'gm-oc.mjs'));
 
-  // Copy agents and skills into opencode config dir
+  // Copy agents into opencode config dir
   copyRecursive(path.join(srcDir, 'agents'), path.join(ocConfigDir, 'agents'));
-  copyRecursive(path.join(srcDir, 'skills'), path.join(ocConfigDir, 'skills'));
 
-  // Write/update opencode.json — merge MCP from package, set default_agent
+  // Write/update opencode.json — set default_agent
   const ocJsonPath = path.join(ocConfigDir, 'opencode.json');
   let ocConfig = {};
   try { ocConfig = JSON.parse(fs.readFileSync(ocJsonPath, 'utf-8')); } catch (e) {}
-  try {
-    const pkgConfig = JSON.parse(fs.readFileSync(path.join(srcDir, 'opencode.json'), 'utf-8'));
-    if (pkgConfig.mcp) ocConfig.mcp = Object.assign({}, pkgConfig.mcp, ocConfig.mcp);
-  } catch (e) {}
+  // Remove stale MCP config (no longer used)
+  delete ocConfig.mcp;
   ocConfig.default_agent = 'gm';
   fs.writeFileSync(ocJsonPath, JSON.stringify(ocConfig, null, 2) + '\n');
 
@@ -48,6 +45,14 @@ try {
     ? path.join(homeDir, 'AppData', 'Roaming', 'opencode', 'plugin') : null;
   if (oldDir && fs.existsSync(oldDir)) {
     try { fs.rmSync(oldDir, { recursive: true, force: true }); } catch (e) {}
+  }
+
+  // Install skills globally via the skills package (supports all agents)
+  const { execSync: execSync2 } = require('child_process');
+  try {
+    execSync2('bunx skills add AnEntrypoint/plugforge --full-depth --all --global --yes', { stdio: 'inherit' });
+  } catch (e) {
+    console.warn('Warning: skills install failed (non-fatal):', e.message);
   }
 
   console.log(`✓ gm-oc ${isUpgrade ? 'upgraded' : 'installed'} to ${ocConfigDir}`);
