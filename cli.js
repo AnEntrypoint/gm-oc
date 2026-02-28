@@ -2,18 +2,35 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { execSync } = require('child_process');
 
 const homeDir = process.env.HOME || process.env.USERPROFILE || os.homedir();
-const ocConfigDir = path.join(homeDir, '.config', 'opencode');
+const destDir = process.platform === 'win32'
+  ? path.join(homeDir, 'AppData', 'Roaming', 'opencode')
+  : path.join(homeDir, '.config', 'opencode');
+
 const srcDir = __dirname;
-const pluginMarker = path.join(ocConfigDir, 'plugins', 'gm-oc.mjs');
-const isUpgrade = fs.existsSync(pluginMarker);
+const isUpgrade = fs.existsSync(path.join(destDir, 'agents', 'gm.md'));
 
 console.log(isUpgrade ? 'Upgrading gm-oc...' : 'Installing gm-oc...');
 
 try {
-  fs.mkdirSync(path.join(ocConfigDir, 'plugins'), { recursive: true });
-  fs.mkdirSync(path.join(ocConfigDir, 'agents'), { recursive: true });
+  fs.mkdirSync(destDir, { recursive: true });
+
+  const filesToCopy = [
+    ['agents', 'agents'],
+    ['hooks', 'hooks'],
+    ['skills', 'skills'],
+    ['index.js', 'index.js'],
+    ['gm.js', 'gm.js'],
+    ['opencode.json', 'opencode.json'],
+    ['.mcp.json', '.mcp.json'],
+    ['README.md', 'README.md'],
+    ['LICENSE', 'LICENSE'],
+    ['CONTRIBUTING.md', 'CONTRIBUTING.md'],
+    ['.gitignore', '.gitignore'],
+    ['.editorconfig', '.editorconfig']
+  ];
 
   function copyRecursive(src, dst) {
     if (!fs.existsSync(src)) return;
@@ -25,38 +42,14 @@ try {
     }
   }
 
-  // Install ESM plugin for opencode auto-loading from plugins directory
-  fs.copyFileSync(path.join(srcDir, 'gm-oc.mjs'), path.join(ocConfigDir, 'plugins', 'gm-oc.mjs'));
+  filesToCopy.forEach(([src, dst]) => copyRecursive(path.join(srcDir, src), path.join(destDir, dst)));
 
-  // Copy agents into opencode config dir
-  copyRecursive(path.join(srcDir, 'agents'), path.join(ocConfigDir, 'agents'));
-
-  // Write/update opencode.json — set default_agent
-  const ocJsonPath = path.join(ocConfigDir, 'opencode.json');
-  let ocConfig = {};
-  try { ocConfig = JSON.parse(fs.readFileSync(ocJsonPath, 'utf-8')); } catch (e) {}
-  // Remove stale MCP config (no longer used)
-  delete ocConfig.mcp;
-  ocConfig.default_agent = 'gm';
-  fs.writeFileSync(ocJsonPath, JSON.stringify(ocConfig, null, 2) + '\n');
-
-  // Clean old AppData install location (no longer used by opencode)
-  const oldDir = process.platform === 'win32'
-    ? path.join(homeDir, 'AppData', 'Roaming', 'opencode', 'plugin') : null;
-  if (oldDir && fs.existsSync(oldDir)) {
-    try { fs.rmSync(oldDir, { recursive: true, force: true }); } catch (e) {}
-  }
-
-  // Install skills globally via the skills package (supports all agents)
-  const { execSync: execSync2 } = require('child_process');
-  try {
-    execSync2('bunx skills add AnEntrypoint/plugforge --full-depth --all --global --yes', { stdio: 'inherit' });
-  } catch (e) {
-    console.warn('Warning: skills install failed (non-fatal):', e.message);
-  }
-
-  console.log(`✓ gm-oc ${isUpgrade ? 'upgraded' : 'installed'} to ${ocConfigDir}`);
+  const destPath = process.platform === 'win32'
+    ? destDir.replace(/\\/g, '/')
+    : destDir;
+  console.log(`✓ gm-oc ${isUpgrade ? 'upgraded' : 'installed'} to ${destPath}`);
   console.log('Restart OpenCode to activate.');
+  console.log('Run "opencode agent list" to verify your agent is available.');
 } catch (e) {
   console.error('Installation failed:', e.message);
   process.exit(1);

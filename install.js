@@ -52,6 +52,23 @@ function safeCopyDirectory(src, dst) {
   }
 }
 
+function safeCopyFile(src, dst) {
+  try {
+    if (!fs.existsSync(src)) {
+      return false;
+    }
+    const content = fs.readFileSync(src, 'utf-8');
+    const dstDir = path.dirname(dst);
+    if (!fs.existsSync(dstDir)) {
+      fs.mkdirSync(dstDir, { recursive: true });
+    }
+    fs.writeFileSync(dst, content, 'utf-8');
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 function install() {
   if (!isInsideNodeModules()) {
     return;
@@ -62,11 +79,13 @@ function install() {
     return;
   }
 
-  const ocDir = path.join(projectRoot, '.config', 'opencode', 'plugin');
+  const ocDir = path.join(projectRoot, '.config', 'opencode');
   const sourceDir = __dirname;
 
   safeCopyDirectory(path.join(sourceDir, 'agents'), path.join(ocDir, 'agents'));
   safeCopyDirectory(path.join(sourceDir, 'hooks'), path.join(ocDir, 'hooks'));
+  safeCopyFile(path.join(sourceDir, 'opencode.json'), path.join(ocDir, 'opencode.json'));
+  safeCopyFile(path.join(sourceDir, '.mcp.json'), path.join(ocDir, '.mcp.json'));
 }
 
 install();

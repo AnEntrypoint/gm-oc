@@ -1,1 +1,1 @@
-module.exports = { GmPlugin: require('./gm-oc.mjs').GmPlugin };
+module.exports = { GmPlugin: require('./gm.js').GmPlugin };
