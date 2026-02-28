@@ -1,15 +1,15 @@
-import fs from 'fs';
-import path from 'path';
+import { readFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
 import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default async ({ project, client, $, directory, worktree }) => {
-  const pluginDir = __dirname;
-  let agentRules = '';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+export async function GmPlugin({ directory }) {
+  const agentsDir = join(__dirname, '..', 'agents');
+
   const loadAgentRules = () => {
-    const agentMd = path.join(pluginDir, 'agents', 'gm.md');
-    try { return fs.readFileSync(agentMd, 'utf-8'); } catch (e) { return ''; }
+    try { return readFileSync(join(agentsDir, 'gm.md'), 'utf-8'); } catch (e) { return ''; }
   };
 
   const runThorns = () => new Promise((resolve) => {
@@ -42,16 +42,16 @@ export default async ({ project, client, $, directory, worktree }) => {
     return '';
   };
 
-  const prdFile = path.join(directory, '.prd');
+  const prdFile = join(directory, '.prd');
 
   return {
     'experimental.chat.system.transform': async (input, output) => {
       const rules = loadAgentRules();
-      const prd = fs.existsSync(prdFile) ? fs.readFileSync(prdFile, 'utf-8').trim() : '';
+      const prd = existsSync(prdFile) ? readFileSync(prdFile, 'utf-8').trim() : '';
       let content = rules || '';
       if (prd) content += '\n\nPENDING WORK (.prd):\n' + prd;
-      // On every user prompt: run thorns fresh + codebasesearch
-      // Skip if last message is from assistant (no new user prompt, e.g. tool result inject)
+      // On every user prompt: run thorns + codebasesearch fresh in parallel
+      // Skip if last message is from assistant (tool result inject, no new user input)
       const msgs = input?.messages || [];
       const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
       const hasNewUserPrompt = !lastMsg || lastMsg.role === 'user';
@@ -67,4 +67,4 @@ export default async ({ project, client, $, directory, worktree }) => {
       if (content) output.system.push(content);
     }
   };
-};
+}

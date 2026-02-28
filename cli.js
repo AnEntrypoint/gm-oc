@@ -44,6 +44,14 @@ try {
 
   filesToCopy.forEach(([src, dst]) => copyRecursive(path.join(srcDir, src), path.join(destDir, dst)));
 
+  // Also write to plugins/gm-oc.mjs - the actual file OpenCode loads
+  const pluginsDir = path.join(destDir, 'plugins');
+  fs.mkdirSync(pluginsDir, { recursive: true });
+  const gmMjsSrc = path.join(srcDir, 'gm.mjs');
+  if (fs.existsSync(gmMjsSrc)) {
+    fs.copyFileSync(gmMjsSrc, path.join(pluginsDir, 'gm-oc.mjs'));
+  }
+
   const destPath = process.platform === 'win32'
     ? destDir.replace(/\\/g, '/')
     : destDir;
