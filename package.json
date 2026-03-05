@@ -51,8 +51,6 @@
     "cli.js",
     "install.js",
     "LICENSE",
-    "CONTRIBUTING.md",
-    ".gitignore",
-    ".editorconfig"
+    ".gitignore"
   ]
 }
